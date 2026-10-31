@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Feedback Sentiment Analyzer</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            positive: { light: '#dcfce7', border: '#86efac', text: '#166534', icon: '#16a34a' },
+            neutral:  { light: '#f3f4f6', border: '#d1d5db', text: '#374151', icon: '#6b7280' },
+            negative: { light: '#fee2e2', border: '#fca5a5', text: '#991b1b', icon: '#dc2626' },
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-slate-50 min-h-screen text-gray-800">
+
+  <!-- ══════════════════ HEADER ══════════════════ -->
+  <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+      <!-- Brand icon -->
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center shrink-0 shadow-md">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15m-6.75-12.896c.251.023.501.05.75.082M19.8 15l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.607L5 14.5m14.8.5l.36 1.8a2.25 2.25 0 01-2.192 2.7H6.032a2.25 2.25 0 01-2.192-2.7l.36-1.8m15.6 0H3.4" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-gray-900 leading-tight">Customer Feedback Sentiment Analyzer</h1>
+        <p class="text-xs text-gray-400">Analisis sentimen berbasis kata kunci · Prototipe Client-Side</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════ MAIN ══════════════════ -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+    <!-- ── INPUT SECTION ── -->
+    <section class="app-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h2 class="section-title">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+        </svg>
+        Input Feedback Pelanggan
+      </h2>
+      <p class="text-sm text-gray-400 mb-4">Tempelkan atau ketik ulasan pelanggan, lalu klik tombol Analisis Sentimen.</p>
+
+      <!-- Textarea -->
+      <textarea
+        id="feedbackInput"
+        rows="5"
+        placeholder="Contoh: Produk ini sangat bagus dan pengirimannya cepat. Saya sangat puas dengan pelayanannya!"
+        class="w-full rounded-xl border border-gray-200 bg-slate-50 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition"
+        aria-label="Input teks feedback pelanggan"
+      ></textarea>
+
+      <!-- Character counter + action row -->
+      <div class="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <p id="charCount" class="text-xs text-gray-400">0 karakter</p>
+        <button
+          id="btnAnalyze"
+          class="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-sm font-semibold shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1"
+          aria-label="Analisis sentimen teks"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+          Analisis Sentimen
+        </button>
+      </div>
+    </section>
+
+    <!-- ── RESULT CARD (hidden until analysis runs) ── -->
+    <section id="resultSection" class="hidden" aria-live="polite" aria-label="Hasil analisis sentimen">
+      <div id="resultCard" class="result-card rounded-2xl border-2 p-5 transition-all duration-300">
+        <div class="flex items-start gap-4">
+          <!-- Sentiment icon badge -->
+          <div id="resultIconWrap" class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl" aria-hidden="true">
+            <span id="resultEmoji">😊</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <!-- Label + confidence -->
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span id="resultLabel" class="text-lg font-bold">Positif</span>
+              <span id="resultBadge" class="sentiment-badge text-xs font-semibold px-2.5 py-0.5 rounded-full">POSITIF</span>
+              <span id="resultScore" class="text-xs text-gray-400 ml-auto">Skor: 0</span>
+            </div>
+            <!-- Highlighted preview text -->
+            <p id="resultPreview" class="text-sm text-gray-500 line-clamp-2 break-words"></p>
+            <!-- Keyword chips -->
+            <div id="resultKeywords" class="mt-2 flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+        <!-- Score bar -->
+        <div class="mt-4">
+          <div class="flex justify-between text-xs text-gray-400 mb-1">
+            <span>Negatif</span><span>Netral</span><span>Positif</span>
+          </div>
+          <div class="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div id="scoreBar" class="absolute inset-y-0 left-0 rounded-full transition-all duration-500" style="width:50%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── STATS ROW ── -->
+    <section aria-label="Statistik ringkasan" class="grid grid-cols-3 gap-3 sm:gap-4">
+
+      <div class="stat-card app-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mx-auto mb-2">
+          <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+        </div>
+        <p id="statPositive" class="text-2xl font-bold text-emerald-600">0</p>
+        <p class="text-xs text-gray-400 mt-0.5">Positif</p>
+      </div>
+
+      <div class="stat-card app-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+        <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mx-auto mb-2">
+          <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/></svg>
+        </div>
+        <p id="statNeutral" class="text-2xl font-bold text-gray-500">0</p>
+        <p class="text-xs text-gray-400 mt-0.5">Netral</p>
+      </div>
+
+      <div class="stat-card app-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center mx-auto mb-2">
+          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
+        </div>
+        <p id="statNegative" class="text-2xl font-bold text-red-500">0</p>
+        <p class="text-xs text-gray-400 mt-0.5">Negatif</p>
+      </div>
+
+    </section>
+
+    <!-- ── CHART + HISTORY ROW ── -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+      <!-- Doughnut chart -->
+      <div class="app-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:col-span-2 flex flex-col">
+        <h2 class="section-title mb-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+          </svg>
+          Distribusi Sentimen
+        </h2>
+        <p class="text-xs text-gray-400 mb-4">Persentase dari semua feedback</p>
+        <div class="flex-1 flex items-center justify-center">
+          <div class="chart-container">
+            <canvas id="sentimentChart" aria-label="Grafik distribusi sentimen" role="img"></canvas>
+          </div>
+        </div>
+        <!-- Legend -->
+        <div id="chartLegend" class="mt-4 flex justify-center gap-4 text-xs text-gray-500 flex-wrap"></div>
+      </div>
+
+      <!-- History list -->
+      <div class="app-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:col-span-3 flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="section-title">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Riwayat Analisis
+          </h2>
+          <span id="historyCount" class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">0 entri</span>
+        </div>
+
+        <!-- History items container -->
+        <div id="historyList" class="space-y-2 overflow-y-auto flex-1" style="max-height: 360px;" role="list" aria-label="Daftar riwayat feedback">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Empty state (hidden when there is data) -->
+        <div id="historyEmpty" class="hidden flex-1 flex flex-col items-center justify-center text-center py-8 text-gray-300">
+          <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+          </svg>
+          <p class="text-sm">Belum ada riwayat analisis</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="mt-8 py-5 border-t border-gray-100 text-center text-xs text-gray-400">
+    Customer Feedback Sentiment Analyzer &copy; 2024 · Prototipe client-side · Analisis berbasis leksikon kata kunci
+  </footer>
+
+  <!-- Main logic -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+/* ============================================================
+   style.css — Sales Analytics Dashboard
+   Purpose : Supplement Tailwind with custom chart sizing,
+             transitions, hover effects, and minor polish.
+   ============================================================ */
+
+/* ── Base ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Filter selects ────────────────────────────────────────── */
+.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.25rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-select:hover {
+  border-color: #93c5fd; /* blue-300 */
+}
+
+/* ── KPI cards ─────────────────────────────────────────────── */
+.kpi-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+/* ── Chart cards ───────────────────────────────────────────── */
+.chart-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.chart-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.chart-title {
+  font-size: 0.9375rem;   /* ~15px */
+  font-weight: 700;
+  color: #111827;         /* gray-900 */
+  line-height: 1.3;
+}
+
+.chart-subtitle {
+  font-size: 0.75rem;     /* 12px */
+  color: #9ca3af;         /* gray-400 */
+  margin-top: 0.1rem;
+}
+
+/* Standard chart height */
+.chart-wrapper {
+  position: relative;
+  height: 260px;
+}
+
+/* Smaller height for pie/doughnut charts */
+.chart-wrapper-sm {
+  position: relative;
+  height: 220px;
+}
+
+/* ── Active filter badge ───────────────────────────────────── */
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: #eff6ff;    /* blue-50 */
+  color: #1d4ed8;         /* blue-700 */
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Loading skeleton pulse ────────────────────────────────── */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.skeleton {
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+  background: #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+/* ── Responsive adjustments ────────────────────────────────── */
+@media (max-width: 640px) {
+  .chart-wrapper    { height: 220px; }
+  .chart-wrapper-sm { height: 200px; }
+}

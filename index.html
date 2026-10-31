@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Analytics Dashboard</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Tailwind custom config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <!-- ===================== TOP HEADER ===================== -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <!-- Logo icon -->
+        <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l7-7 4 4 7-7M3 21h18" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900 leading-tight">Sales Analytics Dashboard</h1>
+          <p class="text-xs text-gray-500">Fiscal Year 2023 · 200 Transactions</p>
+        </div>
+      </div>
+      <!-- Active filter badge -->
+      <div id="activeFiltersBar" class="hidden flex flex-wrap gap-2 items-center text-xs"></div>
+      <!-- Reset button -->
+      <button id="btnResetFilters"
+        class="hidden text-xs px-3 py-1.5 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors duration-200 shrink-0">
+        Reset Filters
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN WRAPPER ===================== -->
+  <main class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- ---- FILTER BAR ---- -->
+    <section aria-label="Filters" class="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4">
+      <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Filters</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+        <!-- Region filter -->
+        <div>
+          <label for="filterRegion" class="block text-xs font-medium text-gray-500 mb-1">Region</label>
+          <select id="filterRegion" class="filter-select w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            <option value="all">All Regions</option>
+          </select>
+        </div>
+
+        <!-- Product Category filter -->
+        <div>
+          <label for="filterCategory" class="block text-xs font-medium text-gray-500 mb-1">Product Category</label>
+          <select id="filterCategory" class="filter-select w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            <option value="all">All Categories</option>
+          </select>
+        </div>
+
+        <!-- Customer Type filter -->
+        <div>
+          <label for="filterCustomer" class="block text-xs font-medium text-gray-500 mb-1">Customer Type</label>
+          <select id="filterCustomer" class="filter-select w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            <option value="all">All Customers</option>
+          </select>
+        </div>
+
+        <!-- Sales Channel filter -->
+        <div>
+          <label for="filterChannel" class="block text-xs font-medium text-gray-500 mb-1">Sales Channel</label>
+          <select id="filterChannel" class="filter-select w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            <option value="all">All Channels</option>
+          </select>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---- KPI CARDS ---- -->
+    <section aria-label="Key Performance Indicators">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total Revenue</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+          </div>
+          <p id="kpiRevenue" class="text-2xl font-bold text-gray-900">—</p>
+          <p id="kpiRevenueCount" class="text-xs text-gray-400 mt-1">across all transactions</p>
+        </div>
+
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Transactions</span>
+            <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+              <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            </div>
+          </div>
+          <p id="kpiTx" class="text-2xl font-bold text-gray-900">—</p>
+          <p class="text-xs text-gray-400 mt-1">total orders recorded</p>
+        </div>
+
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Qty Sold</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            </div>
+          </div>
+          <p id="kpiQty" class="text-2xl font-bold text-gray-900">—</p>
+          <p class="text-xs text-gray-400 mt-1">total units sold</p>
+        </div>
+
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Avg Discount</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+              <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M17 17h.01M7 17L17 7M9 7a2 2 0 11-4 0 2 2 0 014 0zm10 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            </div>
+          </div>
+          <p id="kpiDiscount" class="text-2xl font-bold text-gray-900">—</p>
+          <p class="text-xs text-gray-400 mt-1">average discount rate</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---- ROW 1: Sales Trend + Revenue per Region ---- -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5 lg:col-span-2">
+        <h2 class="chart-title">Sales Trend (Monthly)</h2>
+        <p class="chart-subtitle">Total revenue grouped by month</p>
+        <div class="chart-wrapper mt-4"><canvas id="chartSalesTrend"></canvas></div>
+      </div>
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Revenue per Region</h2>
+        <p class="chart-subtitle">Revenue contribution by region</p>
+        <div class="chart-wrapper mt-4"><canvas id="chartRegion"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ---- ROW 2: Category + Sales Rep ---- -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Revenue per Product Category</h2>
+        <p class="chart-subtitle">Revenue breakdown by product category</p>
+        <div class="chart-wrapper mt-4"><canvas id="chartCategory"></canvas></div>
+      </div>
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Sales per Sales Representative</h2>
+        <p class="chart-subtitle">Total revenue generated per rep</p>
+        <div class="chart-wrapper mt-4"><canvas id="chartSalesRep"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ---- ROW 3: Customer Type + Payment Method + Sales Channel ---- -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Customer Type</h2>
+        <p class="chart-subtitle">New vs Returning customers</p>
+        <div class="chart-wrapper-sm mt-4"><canvas id="chartCustomer"></canvas></div>
+      </div>
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Payment Method</h2>
+        <p class="chart-subtitle">Payment method usage distribution</p>
+        <div class="chart-wrapper-sm mt-4"><canvas id="chartPayment"></canvas></div>
+      </div>
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Sales Channel</h2>
+        <p class="chart-subtitle">Online vs Retail channel share</p>
+        <div class="chart-wrapper-sm mt-4"><canvas id="chartChannel"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ---- ROW 4: Scatter + Top 10 ---- -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Discount vs Sales Amount</h2>
+        <p class="chart-subtitle">Correlation between discount rate and sales</p>
+        <div class="chart-wrapper mt-4"><canvas id="chartScatter"></canvas></div>
+      </div>
+      <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="chart-title">Top 10 Highest Sales</h2>
+        <p class="chart-subtitle">Transactions ranked by sales amount</p>
+        <div class="chart-wrapper mt-4"><canvas id="chartTop10"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ---- ROW 5: Quantity per Category ---- -->
+    <div class="chart-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="chart-title">Quantity Sold per Category</h2>
+      <p class="chart-subtitle">Total units sold broken down by product category</p>
+      <div class="chart-wrapper mt-4"><canvas id="chartQtyCategory"></canvas></div>
+    </div>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="mt-8 py-4 text-center text-xs text-gray-400 border-t border-gray-100">
+    Sales Analytics Dashboard &copy; 2023 · Data sourced from <code>sales_data.json</code>
+  </footer>
+
+  <!-- Main script -->
+  <script src="script.js"></script>
+</body>
+</html>
